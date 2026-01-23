@@ -1,3 +1,76 @@
+
+
+
+
+// Piece-Square Tables
+// These tables provide positional values for each piece type on the board for white. For black, the tables should be mirrored vertically.
+const pawnTable = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5,  5, 10, 25, 25, 10,  5,  5],
+    [0,  0,  0, 20, 20,  0,  0,  0],
+    [5, -5,-10,  0,  0,-10, -5,  5],
+    [5, 10, 10,-20,-20, 10, 10,  5],
+    [0,  0,  0,  0,  0,  0,  0,  0]
+];
+
+const knightTable = [
+    [-50,-40,-30,-30,-30,-30,-40,-50],
+    [-40,-20,  0,  0,  0,  0,-20,-40],
+    [-30,  0, 10, 15, 15, 10,  0,-30],
+    [-30,  5, 15, 20, 20, 15,  5,-30],
+    [-30,  0, 15, 20, 20, 15,  0,-30],
+    [-30,  5, 10, 15, 15, 10,  5,-30],
+    [-40,-20,  0,  5,  5,  0,-20,-40],
+    [-50,-40,-30,-30,-30,-30,-40,-50]
+];
+
+const bishopTable = [
+    [-20,-10,-10,-10,-10,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5, 10, 10,  5,  0,-10],
+    [-10,  5,  5, 10, 10,  5,  5,-10],
+    [-10,  0, 10, 10, 10, 10,  0,-10],
+    [-10, 10, 10, 10, 10, 10, 10,-10],
+    [-10,  5,  0,  0,  0,  0,  5,-10],
+    [-20,-10,-10,-10,-10,-10,-10,-20]
+];
+
+const rookTable = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [5, 10, 10, 10, 10, 10, 10,  5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [0,  0,  0,  5,  5,  0,  0,  0]
+];
+
+const queenTable = [
+    [-20,-10,-10, -5, -5,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5,  5,  5,  5,  0,-10],
+    [-5,  0,  5,  5,  5,  5,  0, -5],
+    [0,  0,  5,  5,  5,  5,  0, -5],
+    [-10,  5,  5,  5,  5,  5,  0,-10],
+    [-10,  0,  5,  0,  0,  0,  0,-10],
+    [-20,-10,-10, -5, -5,-10,-10,-20]
+];
+
+const kingTableMidGame = [
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-20,-30,-30,-40,-40,-30,-30,-20],
+    [-10,-20,-20,-20,-20,-20,-20,-10],
+    [20, 20,  0,  0,  0,  0, 20, 20],
+    [20, 30, 10,  0,  0, 10, 30, 20]
+];
+
+
 export function initializeBoard() {
     const initialBoard = [
         ["rook-black", "knight-black", "bishop-black", "queen-black", "king-black", "bishop-black", "knight-black", "rook-black"],
@@ -333,51 +406,134 @@ function findKing(board: (string | null)[][], kingColor: 'white' | 'black'): [nu
 // AI move
 
 function evaluateBoard(board: (string | null)[][], aiColor: 'white' | 'black'): number {
-    // Implementa una función de evaluación simple que cuenta el material en el tablero
+    let score = 0;
+    const isEndGame = false; // Placeholder for endgame detection
+    // Implement a simple evaluation function based on material count
     const pieceValues: { [key: string]: number } = {
         'pawn': 1,
         'knight': 3,
         'bishop': 3,
         'rook': 5,
         'queen': 9,
-        'king': 0 // El rey no se cuenta en la evaluación, ya que no puede ser capturado
+        'king': 0
     };
 
-    let score = 0;
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             const piece = board[row][col];
             if (piece) {
                 const [type, color] = piece.split('-');
-                const value = pieceValues[type];
-                score += (color === aiColor ? value : -value);
+                const isWhite = color === 'white';
+
+                let pieceValue = 0;
+                let positionValue = 0;
+
+                const tableRow = isWhite ? row : 7 - row;
+                const tableCol = col;
+
+                switch (type) {
+                    case 'pawn': 
+                        pieceValue = 100; 
+                        positionValue = pawnTable[tableRow][tableCol];
+                        break;
+                    case 'knight': 
+                        pieceValue = 320; 
+                        positionValue = knightTable[tableRow][tableCol];
+                        break;
+                    case 'bishop': 
+                        pieceValue = 330; 
+                        positionValue = bishopTable[tableRow][tableCol];
+                        break;
+                    case 'rook': 
+                        pieceValue = 500; 
+                        positionValue = rookTable[tableRow][tableCol];
+                        break;
+                    case 'queen': 
+                        pieceValue = 900; 
+                        positionValue = queenTable[tableRow][tableCol];
+                        break;
+                    case 'king': 
+                        pieceValue = 20000; 
+                        positionValue = kingTableMidGame[tableRow][tableCol];
+                        break;
+                }
+
+                const totalValue = pieceValue + positionValue;
+
+                score += (color === aiColor ? totalValue : -totalValue);
             }
         }
     }
     return score;
 }
 
-function minimax(board: (string | null)[][], depth: number, isMaximizing: boolean, aiColor: 'white' | 'black'): number {
+function minimax(
+    board: (string | null)[][], 
+    depth: number, 
+    alpha: number, 
+    beta: number, 
+    isMaximizing: boolean, 
+    aiColor: 'white' | 'black'
+): number {
     if (depth === 0) {
         return evaluateBoard(board, aiColor);
     }
 
     const opponentColor = aiColor === 'white' ? 'black' : 'white';
-    let bestScore = isMaximizing ? -Infinity : Infinity;
+    
+    // Generate all possible moves for the current player
+    const possibleMoves = getAllPossibleMoves(board, isMaximizing ? aiColor : opponentColor);
 
-    for (let fromRow = 0; fromRow < 8; fromRow++) {
-        for (let fromCol = 0; fromCol < 8; fromCol++) {
-            const piece = board[fromRow][fromCol];
-            if (piece && piece.includes(isMaximizing ? aiColor : opponentColor)) {
-                for (let toRow = 0; toRow < 8; toRow++) {
-                    for (let toCol = 0; toCol < 8; toCol++) {
-                        if (isValidMove(board, piece, fromRow, fromCol, toRow, toCol, board[toRow][toCol])) {
-                            const newBoard = board.map(row => row.slice());
-                            newBoard[toRow][toCol] = piece;
-                            newBoard[fromRow][fromCol] = null;
-                            if (!isKingInCheck(newBoard, isMaximizing ? aiColor : opponentColor)) {
-                                const score = minimax(newBoard, depth - 1, !isMaximizing, aiColor);
-                                bestScore = isMaximizing ? Math.max(bestScore, score) : Math.min(bestScore, score);
+    // If there are no moves, it's checkmate or stalemate
+    if (possibleMoves.length === 0) {
+        if (isKingInCheck(board, isMaximizing ? aiColor : opponentColor)) {
+            return isMaximizing ? -99999 : 99999; // Checkmate is the worst/best possible
+        }
+        return 0; // Stalemate
+    }
+
+    // Move ordering (optional but recommended):
+    // Trying to analyze captures first helps alpha-beta pruning be faster.
+    // For simplicity, here we shuffle them to add variety if scores are equal.
+    possibleMoves.sort(() => Math.random() - 0.5);
+
+    if (isMaximizing) {
+        let maxEval = -Infinity;
+        for (const move of possibleMoves) {
+            const newBoard = simulateMove(board, move);
+            const evalScore = minimax(newBoard, depth - 1, alpha, beta, false, aiColor);
+            maxEval = Math.max(maxEval, evalScore);
+            alpha = Math.max(alpha, evalScore);
+            if (beta <= alpha) break; // Beta pruning
+        }
+        return maxEval;
+    } else {
+        let minEval = Infinity;
+        for (const move of possibleMoves) {
+            const newBoard = simulateMove(board, move);
+            const evalScore = minimax(newBoard, depth - 1, alpha, beta, true, aiColor);
+            minEval = Math.min(minEval, evalScore);
+            beta = Math.min(beta, evalScore);
+            if (beta <= alpha) break; // Alpha pruning
+        }
+        return minEval;
+    }
+}
+
+// Helper function to get all possible moves (to keep main code clean)
+function getAllPossibleMoves(board: (string | null)[][], color: 'white' | 'black') {
+    const moves = [];
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.includes(color)) {
+                for (let toR = 0; toR < 8; toR++) {
+                    for (let toC = 0; toC < 8; toC++) {
+                        if (isValidMove(board, piece, r, c, toR, toC, board[toR][toC])) {
+                            // Extra check to ensure we don't leave the king in check
+                            const tempBoard = simulateMove(board, {fromRow: r, fromCol: c, toRow: toR, toCol: toC, piece});
+                            if (!isKingInCheck(tempBoard, color)) {
+                                moves.push({ fromRow: r, fromCol: c, toRow: toR, toCol: toC, piece });
                             }
                         }
                     }
@@ -385,43 +541,50 @@ function minimax(board: (string | null)[][], depth: number, isMaximizing: boolea
             }
         }
     }
-    return bestScore;
+    return moves;
+}
+
+// Helper function to simulate a move without modifying the original board
+function simulateMove(board: (string | null)[][], move: {fromRow: number, fromCol: number, toRow: number, toCol: number, piece: string}) {
+    const newBoard = board.map(row => row.slice());
+    newBoard[move.toRow][move.toCol] = move.piece;
+    newBoard[move.fromRow][move.fromCol] = null;
+    return newBoard;
 }
 
 export function makeAIMove(board: (string | null)[][], aiColor: 'white' | 'black'): (string | null)[][] {
-    let bestMove: { fromRow: number, fromCol: number, toRow: number, toCol: number } | null = null;
-    let bestScore = -Infinity;
+    const depth = 3; // Adjust depth for difficulty/performance trade-off
+    const possibleMoves = getAllPossibleMoves(board, aiColor);
+    
+    let bestMove: { fromRow: number, fromCol: number, toRow: number, toCol: number, piece: string } | null = null;
+    let bestValue = -Infinity;
+    let alpha = -Infinity;
+    let beta = Infinity;
 
-    for (let fromRow = 0; fromRow < 8; fromRow++) {
-        for (let fromCol = 0; fromCol < 8; fromCol++) {
-            const piece = board[fromRow][fromCol];
-            if (piece && piece.includes(aiColor)) {
-                for (let toRow = 0; toRow < 8; toRow++) {
-                    for (let toCol = 0; toCol < 8; toCol++) {
-                        if (isValidMove(board, piece, fromRow, fromCol, toRow, toCol, board[toRow][toCol])) {
-                            const newBoard = board.map(row => row.slice());
-                            newBoard[toRow][toCol] = piece;
-                            newBoard[fromRow][fromCol] = null;
-                            if (!isKingInCheck(newBoard, aiColor)) {
-                                const score = minimax(newBoard, 3, false, aiColor);
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    bestMove = { fromRow, fromCol, toRow, toCol };
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    possibleMoves.sort(() => Math.random() - 0.5);
+
+    for (const move of possibleMoves) {
+        const newBoard = simulateMove(board, move);
+        // Call minimax for the opponent's turn
+        const boardValue = minimax(newBoard, depth - 1, alpha, beta, false, aiColor);
+
+        if (boardValue > bestValue) {
+            bestValue = boardValue;
+            bestMove = move;
         }
+        // Update alpha for the root level
+        alpha = Math.max(alpha, bestValue);
     }
 
     if (bestMove) {
-        const { fromRow, fromCol, toRow, toCol } = bestMove;
-        const newBoard = board.map(row => row.slice());
-        newBoard[toRow][toCol] = board[fromRow][fromCol];
-        newBoard[fromRow][fromCol] = null;
-        setLastMove({ piece: board[fromRow][fromCol]!, fromRow, fromCol, toRow, toCol });
+        const newBoard = simulateMove(board, bestMove);
+        setLastMove({ 
+            piece: bestMove.piece, 
+            fromRow: bestMove.fromRow, 
+            fromCol: bestMove.fromCol, 
+            toRow: bestMove.toRow, 
+            toCol: bestMove.toCol 
+        });
         return newBoard;
     }
 
