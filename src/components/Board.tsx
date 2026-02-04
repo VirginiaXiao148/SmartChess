@@ -31,17 +31,17 @@ const Board: React.FC = () => {
         setBoard(newBoard);
         setLastMove({ piece: board[fromRow][fromCol]!, fromRow, fromCol, toRow: row, toCol: col });
 
-        // Actualizar el estado de enroque si es necesario
+        // Update the board for castling if the king moves two squares
         if (newBoard[row][col]?.includes('king') && Math.abs(col - fromCol) === 2) {
             const isKingSide = col > fromCol;
             const rookCol = isKingSide ? 7 : 0;
             const newRookCol = isKingSide ? col - 1 : col + 1;
             
-            // Mover la torre automáticamente
+            // Move the rook automatically
             newBoard[row][newRookCol] = newBoard[row][rookCol];
             newBoard[row][rookCol] = null;
         }
-        // Marcar rey y torre como movidos
+        // Mark king and rook as moved
         if (newBoard[row][col]?.includes('king')) {
             setKingMoved(currentPlayer);
         }
@@ -65,9 +65,9 @@ const Board: React.FC = () => {
 
         if (isCheckmate(newBoard, currentPlayer === 'white' ? 'black' : 'white')) {
           alert(`${currentPlayer} wins by checkmate!`);
-          resetGame(); // Reiniciar el juego después de aceptar el mensaje
+          resetGame(); // Reset the game after checkmate
         } else {
-          // IA move
+          // AI move
           setTimeout(() => {
             if (currentPlayer === 'white') {
               const aiBoard = makeAIMove(newBoard, 'black');
@@ -93,7 +93,7 @@ const Board: React.FC = () => {
       setSelectedPiece(null);
       setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
 
-      // IA move after promotion
+      // AI move after promotion
       if (currentPlayer === 'white') {
         const aiBoard = makeAIMove(newBoard, 'black');
         setBoard(aiBoard);
