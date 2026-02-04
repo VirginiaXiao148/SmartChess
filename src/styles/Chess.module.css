@@ -2,14 +2,14 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    width: 800px;
-    height: 800px;
+    width: 700px;
+    height: 700px;
     border: 2px solid #000;
 }
 
 .square {
-    width: 100px;
-    height: 100px;
+    width: 87.5px;
+    height: 87.5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,7 +24,7 @@
 }
 
 .piece {
-    font-size: 4em;
+    font-size: 3.5em;
     font-family: Arial, sans-serif;
     cursor: pointer;
 }
