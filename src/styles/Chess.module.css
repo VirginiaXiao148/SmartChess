@@ -2,14 +2,16 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    width: 700px;
-    height: 700px;
-    border: 2px solid #000;
+    width: 80vmin;
+    height: 80vmin;
+    margin: 20px auto;
+    border: 5px solid #333;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
 .square {
-    width: 87.5px;
-    height: 87.5px;
+    width: 50px;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,7 +26,7 @@
 }
 
 .piece {
-    font-size: 3.5em;
+    font-size: 2em;
     font-family: Arial, sans-serif;
     cursor: pointer;
 }
@@ -32,12 +34,12 @@
 .promotion {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 10px;
   }
   
   .promotion button {
-    margin: 0 10px;
-    padding: 20px;
+    margin: 0 5px;
+    padding: 10px;
     font-size: 1em;
     cursor: pointer;
   }
