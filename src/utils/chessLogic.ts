@@ -475,7 +475,7 @@ export function makeAIMove(board: BoardState, aiColor: PieceColor): BoardState {
     let bestMove = moves[0];
     let bestValue = -Infinity;
     let alpha = -Infinity;
-    let beta = Infinity;
+    const beta = Infinity;
 
     // Prioritize captures to prune the tree faster
     moves.sort((a, b) => {
