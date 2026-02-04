@@ -1,8 +1,8 @@
-# next-chess-app/next-chess-app/README.md
+# Smart Chess Game ♟️
 
-# Next Chess App
+A modern, interactive Chess game built with **Next.js** and **TypeScript**. This project features a custom-built Artificial Intelligence capable of challenging users using classic game theory algorithms.
 
-This is a chess game application built with Next.js. The application allows users to play chess against each other, featuring a fully interactive chessboard and game logic.
+![Chess Board Preview](./public/chessboard.jpg)
 
 ## Project Structure
 
@@ -33,22 +33,65 @@ chess
 └── README.md                # Documentation for the project
 ```
 
-## Getting Started
+## 🚀 Features
 
-To get started with the project, clone the repository and install the dependencies:
+- **Complete Game Logic**: Implementation of all standard chess rules (basic moves, castling, en passant, and promotion).
+- **Artificial Intelligence**:
+  - **Minimax Algorithm** with adjustable depth.
+  - **Alpha-Beta Pruning** to optimize calculation speed.
+  - **Positional Evaluation**: Piece-Square Tables to help the AI understand strategic concepts like center control.
+  - **Mobility Incentive** to prevent passive play and encourage board control.
+- **Responsive Interface**: The board automatically adjusts to screen size while maintaining the correct aspect ratio.
+- **Endgame Detection**: Recognizes Checkmate, Stalemate, and Threefold Repetition.
 
-```bash
-git clone <repository-url>
-cd chess
-npm install
-```
+## 🛠️ Technologies Used
 
-## Running the Application
+- **Framework**: [Next.js](https://nextjs.org/) (React)
+- **Language**: TypeScript
+- **Styling**: CSS Modules (Clean, responsive design)
+- **Logic**: Custom chess engine written in pure TypeScript.
 
-To run the application in development mode, use the following command:
+## 📦 Installation and Usage
 
-```bash
-npm run dev
-```
+Follow these steps to run the project locally:
 
-The application will be available at `http://localhost:3000`.
+1.  **Clone the repository**:
+    ```bash
+    git clone [https://github.com/your-username/smartchess.git](https://github.com/your-username/smartchess.git)
+    cd smartchess
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+
+3.  **Start the development server**:
+    ```bash
+    npm run dev
+    ```
+
+4.  Open your browser at [http://localhost:3000](http://localhost:3000).
+
+## 🧠 How does the AI work?
+
+The "magic" behind the virtual opponent resides in `src/utils/chessLogic.ts`:
+
+1.  **Move Generation**: The AI calculates all legal moves for the current position.
+2.  **Decision Tree (Minimax)**: It simulates future turns (currently with a depth of 3) to predict the opponent's best response.
+3.  **Optimization**:
+    - Uses **Alpha-Beta Pruning** to discard branches of the tree that don't need to be explored, significantly speeding up calculations.
+    - **Move Ordering**: Prioritizes captures to make pruning more effective.
+4.  **Evaluation Function**: Assigns a score to the board based on:
+    - **Material**: Piece values (Pawn=100, Knight=320, etc.).
+    - **Position**: Bonuses if pieces are on advantageous squares (e.g., Knights in the center).
+    - **Mobility**: A small bonus for having more move options than the opponent.
+
+## 🔮 Future Improvements
+
+- [ ] Add a difficulty selector (adjusting Minimax depth).
+- [ ] Implement a chess clock.
+- [ ] Display move history (Algebraic Notation).
+- [ ] Sound effects for moves and captures.

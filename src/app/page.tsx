@@ -5,7 +5,6 @@ import '../styles/globals.css';
 const HomePage = () => {
   return (
     <main>
-      <h1>Chess Game</h1>
       <Board />
     </main>
   );
