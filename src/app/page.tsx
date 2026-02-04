@@ -4,10 +4,10 @@ import '../styles/globals.css';
 
 const HomePage = () => {
   return (
-    <div>
+    <main>
       <h1>Chess Game</h1>
       <Board />
-    </div>
+    </main>
   );
 };
 
