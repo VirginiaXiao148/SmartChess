@@ -1,7 +1,6 @@
+// src/utils/chessLogic.ts
 
-
-
-
+// --- TIPOS ---
 export type PieceColor = 'white' | 'black';
 export type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
 export type BoardState = (string | null)[][];
@@ -14,9 +13,9 @@ interface Move {
     piece: string;
 }
 
+// --- TABLAS DE VALORACIÓN (Estrategia posicional) ---
+// Valores para las BLANCAS.
 
-// Piece-Square Tables
-// These tables provide positional values for each piece type on the board for white. For black, the tables should be mirrored vertically.
 const pawnTable = [
     [0,  0,  0,  0,  0,  0,  0,  0],
     [50, 50, 50, 50, 50, 50, 50, 50],
@@ -83,8 +82,9 @@ const kingTableMidGame = [
     [20, 30, 10,  0,  0, 10, 30, 20]
 ];
 
+// --- ESTADO GLOBAL ---
 let lastMove: { piece: string, fromRow: number, fromCol: number, toRow: number, toCol: number } | null = null;
-const positionHistory: string[] = [];
+const positionHistory: string[] = []; // Historial de tableros (FEN simplificado)
 let halfMoveClock: number = 0;
 const kingMoved = { white: false, black: false };
 const rookMoved = { 'white-0': false, 'white-7': false, 'black-0': false, 'black-7': false };
@@ -110,7 +110,7 @@ export function incrementHalfMoveClock() { halfMoveClock++; }
 export function setKingMoved(color: PieceColor) { kingMoved[color] = true; }
 export function setRookMoved(color: PieceColor, col: 0 | 7) { rookMoved[`${color}-${col}`] = true; }
 
-// Checks for threefold repetition and fifty-move rule
+// Verifica repetición para reglas del juego (y para la IA)
 export function isThreefoldRepetition(board: BoardState, updateHistory = true): boolean {
     const boardString = board.map(row => row.join(',')).join(';');
     if (updateHistory) positionHistory.push(boardString);
@@ -119,6 +119,7 @@ export function isThreefoldRepetition(board: BoardState, updateHistory = true): 
 }
 export function isFiftyMoveRule(): boolean { return halfMoveClock >= 50; }
 
+// --- VALIDACIÓN DE MOVIMIENTOS ---
 
 export function isValidMove(board: BoardState, pieceType: string, fromRow: number, fromCol: number, toRow: number, toCol: number, toSquare: string | null): boolean {
     const rowDiff = Math.abs(toRow - fromRow);
@@ -155,14 +156,15 @@ export function isValidMove(board: BoardState, pieceType: string, fromRow: numbe
 
     if (!geometryValid) return false;
 
-    // Check if there is checkmate
+    // Simular para validar Jaque
     const newBoard = simulateMove(board, { fromRow, fromCol, toRow, toCol, piece: pieceType });
     if (isKingInCheck(newBoard, color)) return false;
 
     return true;
 }
 
-// Generate all possible moves for a given color
+// --- GENERACIÓN DE MOVIMIENTOS ---
+
 function getAllPossibleMoves(board: BoardState, color: PieceColor): Move[] {
     const moves: Move[] = [];
     
@@ -205,7 +207,7 @@ function tryAddMove(board: BoardState, fr: number, fc: number, tr: number, tc: n
     const target = board[tr][tc];
     if (target && target.includes(color)) return; 
 
-    // Check if the move would leave the king in check
+    // Simular para validar Jaque 
     const newBoard = simulateMove(board, {fromRow: fr, fromCol: fc, toRow: tr, toCol: tc, piece});
     if (!isKingInCheck(newBoard, color)) {
         moves.push({ fromRow: fr, fromCol: fc, toRow: tr, toCol: tc, piece });
@@ -216,15 +218,15 @@ function generatePawnMoves(board: BoardState, r: number, c: number, color: Piece
     const dir = color === 'white' ? -1 : 1;
     const startRow = color === 'white' ? 6 : 1;
 
-    // 1. Simple advance
+    // 1. Avance simple
     if (!board[r + dir]?.[c]) {
         tryAddMove(board, r, c, r + dir, c, piece, color, moves);
-        // 2. Double advance from starting position
+        // 2. Avance doble 
         if (r === startRow && !board[r + 2 * dir]?.[c]) {
             tryAddMove(board, r, c, r + 2 * dir, c, piece, color, moves);
         }
     }
-    // 3. Captures
+    // 3. Capturas
     const captureCols = [c - 1, c + 1];
     for (const cc of captureCols) {
         if (cc >= 0 && cc <= 7) {
@@ -246,7 +248,7 @@ function generateSlidingMoves(board: BoardState, r: number, c: number, dirs: num
                 if (!target.includes(color)) {
                     tryAddMove(board, r, c, tr, tc, piece, color, moves); 
                 }
-                break;
+                break; 
             }
             tryAddMove(board, r, c, tr, tc, piece, color, moves); 
             tr += dr;
@@ -255,6 +257,7 @@ function generateSlidingMoves(board: BoardState, r: number, c: number, dirs: num
     }
 }
 
+// --- AYUDANTES DE LÓGICA ---
 
 function simulateMove(board: BoardState, move: Move): BoardState {
     const newBoard = board.map(row => row.slice());
@@ -291,6 +294,8 @@ function isPathClear(board: BoardState, fromRow: number, fromCol: number, toRow:
     return true;
 }
 
+// --- JAQUE Y ATAQUES ---
+
 export function isKingInCheck(board: BoardState, kingColor: PieceColor): boolean {
     const kingPos = findKing(board, kingColor);
     if (!kingPos) return false; 
@@ -300,24 +305,24 @@ export function isKingInCheck(board: BoardState, kingColor: PieceColor): boolean
 function isSquareAttacked(board: BoardState, r: number, c: number, color: PieceColor): boolean {
     const opponentColor = color === 'white' ? 'black' : 'white';
     
-    // Pawns
+    // Peones
     const pawnDir = color === 'white' ? -1 : 1; 
     if (board[r+pawnDir]?.[c-1] === `pawn-${opponentColor}`) return true;
     if (board[r+pawnDir]?.[c+1] === `pawn-${opponentColor}`) return true;
 
-    // Knights
+    // Caballos
     const kOffsets = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
     for (const [dr, dc] of kOffsets) {
         if (board[r+dr]?.[c+dc] === `knight-${opponentColor}`) return true;
     }
 
-    // King
+    // Rey
     for (let i=-1; i<=1; i++) for (let j=-1; j<=1; j++) {
         if (i===0 && j===0) continue;
         if (board[r+i]?.[c+j] === `king-${opponentColor}`) return true;
     }
 
-    // Rooks/Queens
+    // Torres/Reinas
     const orthodirs = [[-1,0],[1,0],[0,-1],[0,1]];
     for (const [dr, dc] of orthodirs) {
         let tr = r + dr, tc = c + dc;
@@ -331,7 +336,7 @@ function isSquareAttacked(board: BoardState, r: number, c: number, color: PieceC
         }
     }
 
-    // Bishops/Queens
+    // Alfiles/Reinas
     const diagdirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
     for (const [dr, dc] of diagdirs) {
         let tr = r + dr, tc = c + dc;
@@ -356,18 +361,20 @@ function findKing(board: BoardState, color: PieceColor): [number, number] | null
     return null;
 }
 
+// --- ENROQUE ---
+
 function isValidCastling(board: BoardState, pieceType: string, fromRow: number, fromCol: number, toRow: number, toCol: number): boolean {
     const color = pieceType.split('-')[1] as PieceColor;
     if (kingMoved[color] || isKingInCheck(board, color)) return false;
 
-    // Short
+    // Corto
     if (toCol === fromCol + 2) {
         if (rookMoved[`${color}-7`] || board[fromRow][7] !== `rook-${color}`) return false;
         if (board[fromRow][fromCol+1] || board[fromRow][fromCol+2]) return false; 
         if (isSquareAttacked(board, fromRow, fromCol+1, color) || isSquareAttacked(board, fromRow, fromCol+2, color)) return false;
         return true;
     }
-    // Long
+    // Largo
     if (toCol === fromCol - 2) {
         if (rookMoved[`${color}-0`] || board[fromRow][0] !== `rook-${color}`) return false;
         if (board[fromRow][fromCol-1] || board[fromRow][fromCol-2] || board[fromRow][fromCol-3]) return false;
@@ -389,17 +396,17 @@ export function isStalemate(board: BoardState, color: PieceColor): boolean {
     return moves.length === 0;
 }
 
-// AI and Minimax
+// --- INTELIGENCIA ARTIFICIAL (MINIMAX + ALPHA-BETA) ---
 
 function evaluateBoard(board: BoardState, aiColor: PieceColor): number {
     let score = 0;
     
-    // Count mobility to prevent the AI from staying still
+    // Contamos movilidad para evitar que la IA se quede quieta
     const opponentColor = aiColor === 'white' ? 'black' : 'white';
     const myMoves = getAllPossibleMoves(board, aiColor).length;
     const oppMoves = getAllPossibleMoves(board, opponentColor).length;
     
-    score += (myMoves - oppMoves) * 0.1; // Small mobility bonus
+    score += (myMoves - oppMoves) * 0.1; // Bonus de movilidad pequeño
 
     for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
@@ -435,10 +442,10 @@ function minimax(board: BoardState, depth: number, alpha: number, beta: number, 
 
     if (possibleMoves.length === 0) {
         if (isKingInCheck(board, currentPlayer)) {
-            // Checkmate as soon as possible: Add/Subtract depth to prefer closer checkmates
-            return isMaximizing ? -100000 - depth : 100000 + depth;
+            // Mate lo antes posible: Sumamos/Restamos depth para preferir mates cercanos
+            return isMaximizing ? -100000 - depth : 100000 + depth; 
         }
-        return 0; // Stalemate
+        return 0; // Ahogado
     }
 
     possibleMoves.sort(() => Math.random() - 0.5);
@@ -467,7 +474,7 @@ function minimax(board: BoardState, depth: number, alpha: number, beta: number, 
 }
 
 export function makeAIMove(board: BoardState, aiColor: PieceColor): BoardState {
-    const depth = 3;
+    const depth = 3; 
     const moves = getAllPossibleMoves(board, aiColor);
     
     if (moves.length === 0) return board;
@@ -477,7 +484,7 @@ export function makeAIMove(board: BoardState, aiColor: PieceColor): BoardState {
     let alpha = -Infinity;
     let beta = Infinity;
 
-    // Prioritize captures to prune the tree faster
+    // Priorizar capturas para podar el árbol más rápido
     moves.sort((a, b) => {
         const pieceA = board[a.toRow][a.toCol];
         const pieceB = board[b.toRow][b.toCol];
@@ -487,14 +494,14 @@ export function makeAIMove(board: BoardState, aiColor: PieceColor): BoardState {
     for (const move of moves) {
         const newBoard = simulateMove(board, move);
         
-        // --- AVOID REPETITION ---
-        // We check if this move leads to a position we have already seen
+        // --- EVITAR REPETICIÓN ---
+        // Verificamos si este movimiento lleva a una posición que ya hemos visto
         const boardStr = newBoard.map(row => row.join(',')).join(';');
         const isRepeated = positionHistory.includes(boardStr);
         let val = minimax(newBoard, depth - 1, alpha, beta, false, aiColor);
 
-        // Penalty for repetition (unless it's the only option to save oneself)
-        if (isRepeated) val -= 50;
+        // Penalización por repetición (a menos que sea la única opción para salvarse)
+        if (isRepeated) val -= 50; 
 
         if (val > bestValue) {
             bestValue = val;
