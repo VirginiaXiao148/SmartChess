@@ -95,3 +95,7 @@ The "magic" behind the virtual opponent resides in `src/utils/chessLogic.ts`:
 - [ ] Implement a chess clock.
 - [ ] Display move history (Algebraic Notation).
 - [ ] Sound effects for moves and captures.
+
+
+## Author
+Developed by [Virginia Toledo](https://github.com/VirginiaXiao148).
